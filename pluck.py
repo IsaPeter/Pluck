@@ -5,19 +5,20 @@ import pluck.settings as settings
 import os, sys
 import issuelib as issuelib
 
-from pluck.modules.xss_test_module import XssTester3
+#from pluck.modules.test_module import TestModule
+from pluck.modules.xss_test_module import XssTester
 from pluck.modules.http_methods import HttpMethodTester2
 from pluck.modules.html_injector import HTMLInjectionTester3
-from pluck.modules.command_injector import OSCommandInjector2
-from pluck.modules.open_redirector import OpenRedirectionInjector2
-from pluck.modules.test_module import TestModule
-from pluck.modules.reflection_tester import ParameterReflectionTester2
-from pluck.modules.php_injection import PHPCodeInjectionTester2
-from pluck.modules.ssi_injection import SSIInjectionTester2
-from pluck.modules.sql_injection import SQLInjectionTester2
+from pluck.modules.command_injector import OSCommandInjector
+from pluck.modules.open_redirector import OpenRedirectionInjector
+from pluck.modules.reflection_tester import ParameterReflectionTester
+from pluck.modules.php_injection import PHPCodeInjectionTester
+from pluck.modules.ssi_injection import SSIInjectionTester
+from pluck.modules.sql_injection import SQLInjectionTester
 from pluck.modules.directory_traversal import DirectoryTraversalTester
-from pluck.modules.template_injection import TemplateInjectionTester2
+from pluck.modules.template_injection import TemplateInjectionTester
 from pluck.modules.crlf_injector import CRLFInjectionTester
+from pluck.modules.shellshock import ShellShockTester
 
 
 # Load the request from file.
@@ -149,19 +150,20 @@ def main():
 
     # Application available modules
     available_modules = {
-        "xss":XssTester3(parsed_request),  # OK
+        "xss":XssTester(parsed_request),  # OK
         "http_methods" : HttpMethodTester2(parsed_request), # OK
         "html_injection" : HTMLInjectionTester3(parsed_request), # OK
-        "command_inject" : OSCommandInjector2(parsed_request), # OK
-        "ored" : OpenRedirectionInjector2(parsed_request), # OK
+        "command_inject" : OSCommandInjector(parsed_request), # OK
+        "ored" : OpenRedirectionInjector(parsed_request), # OK
         #"test": TestModule(parsed_request),
-        "reflection" : ParameterReflectionTester2(parsed_request), # OK
-        "php": PHPCodeInjectionTester2(parsed_request), # OK
-        "ssi" : SSIInjectionTester2(parsed_request), # OK
-        "sqli" : SQLInjectionTester2(parsed_request), # OK
-        "traversal" : DirectoryTraversalTester(parsed_request),
-        "template" : TemplateInjectionTester2(parsed_request), # OK
-        "crlf" : CRLFInjectionTester(parsed_request)
+        "reflection" : ParameterReflectionTester(parsed_request), # OK
+        "php": PHPCodeInjectionTester(parsed_request), # OK
+        "ssi" : SSIInjectionTester(parsed_request), # OK
+        "sqli" : SQLInjectionTester(parsed_request), # OK
+        "traversal" : DirectoryTraversalTester(parsed_request), #OK
+        "template" : TemplateInjectionTester(parsed_request), # OK
+        "crlf" : CRLFInjectionTester(parsed_request), 
+        "shellshock": ShellShockTester(parsed_request), 
     }
 
     if args.list_modules:

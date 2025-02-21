@@ -1,13 +1,11 @@
 
-from pluck.core import BaseModule, PayloadInjector, Finding
 import pluck.settings as settings
-from httplib import HTTPRequest, HTTPResponse,  HTTPRequestSender
-import issuelib as issuelib
 import random, string
+from pluck.module import ActiveModule
 
 
 
-class ShellShockTester(BaseModule):
+class ShellShockTester(ActiveModule):
     def __init__(self, request):
         super().__init__(request)
         self.name = "Shell Shock Tester"
@@ -19,45 +17,6 @@ class ShellShockTester(BaseModule):
         self.unique_string = self.generate_unique_string()
         self.success_strings = []
         
-    def generate_requests(self, payloads):
-        # Create an injector
-        injector = PayloadInjector(HTTPRequest(self.original_request.rebuild_request()))
-        
-        # Injection dictionary létrehozása
-        injection_dict = injector.find_injection_points() # This stores an injection dictionary
-        
-        # return back the points which have least 1 parameter
-        available_injection_points = injector.get_available_injection_points()
-
-        #print(f"Generating requests for: Points: {str(self.injection_points)} and Parameters: {str(self.test_parameters)}")
-        #print("Available Injection Points: ", available_injection_points)
-        #print("Excluded Parameters: ", self.excluded_parameters)
-        #print("Available Parameters: ")
-
-        request_list = []
-        # Minden feladat hozzáadása a queue-hoz
-        for point in self.injection_points:
-            if point in available_injection_points:
-                print(f"Parameters for {point}: ", ', '.join(injector.get_injection_parameters(point)))
-                for key in injection_dict[point]:
-                    if key not in self.excluded_parameters:
-                        if len(self.test_parameters) == 0 or key in self.test_parameters:
-                            for p in payloads:
-                                new_request = HTTPRequest(self.original_request.rebuild_request())
-                                injector = PayloadInjector(new_request)
-                                injector.inject_payload(point, key, p)
-                                request_list.append((p, point, key, new_request))
-
-        return request_list
-    
-    def send_requests(self, request_list):
-
-        for payload, point, key, req in request_list:
-            response = self.sender.send_request(req)
-            if self.analyze_response(response):
-                print(f"[!] Shell Shock Found in Point: {point} Parameter: {key}, Payload: {payload}. Request ID: {req.request_id}")
-                break;
-
     def analyze_response(self, response):
         # check root in passwd
         for message in self.success_strings:

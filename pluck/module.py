@@ -104,7 +104,10 @@ class ActiveModule(BaseModule):
 
         # Get the available injection points where possible to inject 
         # eg.: has a parameter
-        available_inj = [k for k in injection_dict.keys() if injection_dict[k]]    
+        if self.injection_points:
+            available_inj = [k for k in injection_dict.keys() if injection_dict[k] and k in self.injection_points]
+        else:
+            available_inj = [k for k in injection_dict.keys() if injection_dict[k]]    
         
         # Collect all the points and parameters
         if not self.test_parameters:

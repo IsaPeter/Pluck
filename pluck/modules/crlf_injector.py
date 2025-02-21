@@ -17,54 +17,70 @@ class CRLFInjectionTester(BaseModule):
         self.generator = None
 
         self.unique_string = self.generate_unique_string()
-        
+   
+    # Generate the requests for the sender
     def generate_requests(self, payloads):
         # Create an injector
         injector = PayloadInjector(HTTPRequest(self.original_request.rebuild_request()))
         
         # Injection dictionary létrehozása
         injection_dict = injector.find_injection_points() # This stores an injection dictionary
+
+        # Get the available injection points where possible to inject 
+        # eg.: has a parameter
+        if self.injection_points:
+            available_inj = [k for k in injection_dict.keys() if injection_dict[k] and k in self.injection_points]
+        else:
+            available_inj = [k for k in injection_dict.keys() if injection_dict[k]]    
         
-        # return back the points which have least 1 parameter
-        available_injection_points = injector.get_available_injection_points()
-
-        #print(f"Generating requests for: Points: {str(self.injection_points)} and Parameters: {str(self.test_parameters)}")
-        #print("Available Injection Points: ", available_injection_points)
-        #print("Excluded Parameters: ", self.excluded_parameters)
-        #print("Available Parameters: ")
-
+        # Collect all the points and parameters
+        if not self.test_parameters:
+            inj_parameters = [(point,param) for point in available_inj for param in injection_dict[point] if param not in self.excluded_parameters]
+        else:
+            inj_parameters = [(point,param) for point in available_inj for param in injection_dict[point] if param in self.test_parameters]
+        
+        # A list which will contain a generated requests
         request_list = []
-        # Minden feladat hozzáadása a queue-hoz
-        for point in self.injection_points:
-            if point in available_injection_points:
-                print(f"Parameters for {point}: ", ', '.join(injector.get_injection_parameters(point)))
-                for key in injection_dict[point]:
-                    if key not in self.excluded_parameters:
-                        if len(self.test_parameters) == 0 or key in self.test_parameters:
-                            for p in payloads:
-                                new_request = HTTPRequest(self.original_request.rebuild_request())
-                                injector = PayloadInjector(new_request)
-                                injector.inject_payload(point, key, p)
-                                request_list.append((p, point, key, new_request))
+
+        # iterate through all the points, parameters and payloads and generate available requests
+        for point,param in inj_parameters:
+            for payload in payloads:
+                new_request = HTTPRequest(self.original_request.rebuild_request())
+                injector = PayloadInjector(new_request)
+                injector.inject_payload(point, param, payload)
+                request_list.append((payload, point, param, new_request))
+
+                appended = HTTPRequest(self.original_request.rebuild_request())
+                injector_ap = PayloadInjector(appended)
+                injector_ap.inject_payload(point, param, payload, append=True)
+               
+                request_list.append((payload, point, param, appended))
+
+        modhead = HTTPRequest(self.original_request.rebuild_request())
+        modhead.set_custom_header("Pluck", self.unique_string)
+        request_list.append((self.unique_string, "headers", "Pluck", modhead))
+
 
         return request_list
     
-    def send_requests(self, request_list):
 
-        for payload, point, key, req in request_list:
-            response = self.sender.send_request(req)
-            if self.analyze_response(response):
-                print(f"[!] CRLF Injection Found in Point: {point} Parameter: {key}, Payload: {payload}. Request ID: {req.request_id}")
-                break;
-
-    def analyze_response(self, response):
+    def analyze_response(self, response, request, payload, point, param):
+        
+        issue_found = False
         # check root in passwd
         response_headers = response.get_headers()
         if "Pluck" in response_headers:
             if response_headers["Pluck"] == self.unique_string:
-                return True
+                if point != "headers":
+                    settings.finding_library.add_finding(name="CRLF Injection",payload=payload, point=point, param=param, module=self.name, request=request, response=response)
+                    issue_found = True
+                else:
+                    settings.finding_library.add_finding(name="Arbitrary Header Injection",payload=payload, point=point, param=param, module=self.name, request=request, response=response)
+                    issue_found = True
         
-        return False
+        if issue_found and not self.continue_on_success:
+            self.stop_test()  
+
 
     def generate_payloads(self):
         headers = ['%0APluck:UNIQUE', '%0A%20Pluck:UNIQUE', '%20%0APluck:UNIQUE', '%23%OAPluck:UNIQUE', '%E5%98%8A%E5%98%8DPluck:UNIQUE', 
