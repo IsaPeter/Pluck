@@ -133,7 +133,7 @@ Injection points:
 ```
 
 
-### HTML Injection GET Request
+### HTML Injection GET Request Demonstration
 
 **Obtain a request and save to a file**
 
