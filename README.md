@@ -51,5 +51,12 @@ Library Items:  1
 
 Copy the request id and filter the HTTP history in burp to obtain the proper payload.
 
+![image](https://github.com/user-attachments/assets/c9207c22-9b69-4864-b069-78f105dc533c)
+
+The request contained the payload and therespose the injected HTML payload
+
+![image](https://github.com/user-attachments/assets/56ad6cad-9822-46ee-909c-b20a4450167d)
+
+
 
 
