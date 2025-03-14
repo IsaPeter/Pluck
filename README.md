@@ -1,5 +1,28 @@
 # Pluck
 
+Pluck is a web application vulnerability scanner with custom payload generation function. It injects all the generated payloads into all the possible injection points and check the response of the server for multiple scenarios, depending on the generated payload type.
+
+### Modules
+
+```
++----------------+-----------------------------+
+| Module Name    | Summary                     |
++----------------+-----------------------------+
+| xss            | XSS Tester Module           |
+| http_methods   | HTTP Method Tester          |
+| html_injection | HTML Injection Tester       |
+| command_inject | OS Command Injection Tester |
+| ored           | Open Redirection Tester     |
+| reflection     | Parameter Reflection Tester |
+| php            | PHP Code Injection Tester   |
+| ssi            | SSI Injection Tester        |
+| sqli           | SQL Injection Tester        |
+| traversal      | Directory Traversal Tester  |
+| template       | Template Injection Tester   |
+| crlf           | CRLF Injection Tester       |
+| shellshock     | Shell Shock Tester          |
++----------------+-----------------------------+
+```
 
 
 ### HTML Injection GET Request
