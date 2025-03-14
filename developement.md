@@ -9,4 +9,5 @@
 
 ## Further developement and functions
 
-- [ ]  Use Playwright insted of Selenium
+- [ ] Use Playwright insted of Selenium
+- [ ] Remove `issuelib.py` from all files
