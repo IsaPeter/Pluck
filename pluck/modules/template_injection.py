@@ -9,7 +9,7 @@ from pluck.module import ActiveModule
 class TemplateInjectionTester(ActiveModule):
     def __init__(self,request):
         super().__init__(request)
-        self.name = "Template Injection Tester 2"
+        self.name = "Template Injection Tester"
         self.generator = TemplateInjectionGenerator()
     
     def analyze_response(self, response, request, payload, point, param):

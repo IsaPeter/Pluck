@@ -5,7 +5,7 @@ from pluck.module import ActiveModule
 class OSCommandInjector(ActiveModule):
     def __init__(self, request):
         super().__init__(request)
-        self.name="OS Command Injector"
+        self.name="OS Command Injection Tester"
         self.generator = None
         self.default_injection_points = ["query", "body", "headers", "cookies"]
 

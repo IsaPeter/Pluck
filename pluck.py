@@ -3,7 +3,9 @@ from httplib import HTTPRequest, HTTPResponse, HTTPRequestSender
 from pluck.core import PayloadInjector, FindingLibrary
 import pluck.settings as settings
 import os, sys
-import issuelib as issuelib
+from terminaltables3 import AsciiTable
+from textwrap import wrap
+
 
 #from pluck.modules.test_module import TestModule
 from pluck.modules.xss_test_module import XssTester
@@ -43,22 +45,30 @@ def print_test_parameters(request):
 
 # Parsing the arguments
 def parse_arguments():
-    parser = ArgumentParser(description="Pluck Web Tester")
-    parser.add_argument("-r","--request", dest="request", help="Set the initial request")
-    parser.add_argument("-x","--proxy", dest="proxy", help="Set the Proxy")
-    parser.add_argument("-b","--base-address", dest="base_address", help="Set the base address for URL creation")
-    parser.add_argument("-s","--protocol", dest="protocol", help="Set the protocol http/https")
-    parser.add_argument("-p","--port", dest="port", help="Set the web application port number")
-    parser.add_argument("-k","--ignore-certificate", dest="ignire_cert", action="store_true", help="Ignore the SSL Warnings")
-    parser.add_argument("-I","--injection-points", dest="injection_points", help="Set injection points ',' coma separated")
-    parser.add_argument("--payload-timeout", dest="payload_timeout", help="Set the payload timeout.")
-    parser.add_argument("-m","--modules", dest="modules", help="Set the using modules")
-    parser.add_argument("-P","--parameters", dest="parameters", help="Set the testing parameters")
-    parser.add_argument("--oast", dest="oast", help="Set Collaborator address for OAST")
-    parser.add_argument("--exclude-parameter", dest="exclude_parameter", help="Exclude parameter from testing")
-    parser.add_argument("--continue-on-success", dest="continue_on_success", action="store_true", help="Continue Testing if found a vulnerability")
-    parser.add_argument("--list-modules", dest="list_modules", action="store_true", help="List the available modules")
-    parser.add_argument("--test",dest="testing",action="store_true")
+    parser = ArgumentParser(description="Pluck Web Application Vulnerability Tester")
+
+    rh_parser = parser.add_argument_group("Pluck Request Handling")
+    rh_parser.add_argument("-r","--request", dest="request", metavar="", help="Set the initial request")
+    rh_parser.add_argument("-x","--proxy", dest="proxy", metavar="", help="Set the Proxy")
+    rh_parser.add_argument("-b","--base-address", dest="base_address", metavar="", help="Set the base address for URL creation")
+    rh_parser.add_argument("-s","--protocol", dest="protocol", metavar="", help="Set the protocol http/https")
+    rh_parser.add_argument("-p","--port", dest="port", metavar="", help="Set the web application port number")
+    rh_parser.add_argument("-k","--ignore-cert", dest="ignore_cert", action="store_true", help="Ignore the SSL Warnings")
+    
+    
+    general_parser = parser.add_argument_group("Pluck General Options")
+    general_parser.add_argument("--list-modules", dest="list_modules", action="store_true", help="List the available modules")
+    general_parser.add_argument("-li","--list-injection-points", dest="list_injection_points", action="store_true", help="List the available injection points")
+    general_parser.add_argument("--test",dest="testing",action="store_true")
+    
+    exec_parser = parser.add_argument_group("Pluck Execution Options")
+    exec_parser.add_argument("-I","--injection-points", dest="injection_points", metavar="", help="Set injection points ',' coma separated")
+    exec_parser.add_argument("--payload-timeout", dest="payload_timeout", metavar="", help="Set the payload timeout.")
+    exec_parser.add_argument("-m","--modules", dest="modules", metavar="", help="Set the using modules")
+    exec_parser.add_argument("-P","--parameters", dest="parameters", metavar="", help="Set the testing parameters")
+    exec_parser.add_argument("--oast", dest="oast", metavar="", help="Set Collaborator address for OAST")
+    exec_parser.add_argument("--exclude-parameter", dest="exclude_parameter", metavar="", help="Exclude parameter from testing")
+    exec_parser.add_argument("--continue-on-success", dest="continue_on_success", action="store_true", help="Continue Testing if found a vulnerability")
     
 
 
@@ -91,7 +101,7 @@ def main():
     if args.port:
         settings.port_number = int(args.port)
 
-    if args.ignire_cert:
+    if args.ignore_cert:
         settings.ignore_certificate = True
 
     if args.injection_points:
@@ -167,10 +177,26 @@ def main():
     }
 
     if args.list_modules:
-        print("Reference\t\tName\n"+"#"*30)
+        table_data = [["Module Name","Summary"]]
         for name, module in available_modules.items():
-            print(f"{name}\t\t{module.name}")
+            table_data.append([name, module.name])
+        print(AsciiTable(table_data).table)
         sys.exit(0)
+
+    if args.list_injection_points:
+        if parsed_request:
+            table_data = [["Injection Points", "Parameters"]]
+            table = AsciiTable(table_data)
+            inj = PayloadInjector(parsed_request)
+            ip = inj.find_injection_points()
+            for point in ip.keys():
+                longstr = ', '.join([i for i in ip[point]])
+                max_width = table.column_max_width(1)
+                wrapped_string = "\n".join(wrap(longstr, max_width))
+                table.table_data.append([point.title(), wrapped_string])
+            print(table.table)
+        sys.exit(0)
+
 
     if args.testing:
         testing(parsed_request)

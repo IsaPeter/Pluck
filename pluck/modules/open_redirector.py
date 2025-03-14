@@ -8,7 +8,7 @@ from pluck.module import ActiveModule
 class OpenRedirectionInjector(ActiveModule):
     def __init__(self, request):
         super().__init__(request)
-        self.name="Open Redirection Injection"
+        self.name="Open Redirection Tester"
         self.generator = OpenRedirectionPayloadGenerator()
         self.default_injection_points = ["query", "body", "headers"]
         self.random_domain = ""

@@ -7,7 +7,7 @@ from pluck.module import ActiveModule
 class HttpMethodTester2(ActiveModule):
     def __init__(self, request):
         super().__init__(request)
-        self.name = "HTTPMethodTester" 
+        self.name = "HTTP Method Tester" 
 
         # Alap HTTP metódusok
         self.methods_to_test = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'TRACE', 'CONNECT', 'PATCH']

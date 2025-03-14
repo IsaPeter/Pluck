@@ -74,7 +74,7 @@ class PayloadInjector:
                 if key in body_params:
                     if append:
                         value = body_params[key][0]
-                        body_params[key] = [key+payload]
+                        body_params[key] = [value+payload]
                     else:
                         body_params[key] = [payload]
                     self.http_request.body = urlencode(body_params, doseq=True)
